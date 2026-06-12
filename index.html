@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ナデシコ源泉徴収計算機 — フリーランスの報酬税額・手取りを瞬時に計算</title>
+<meta name="description" content="フリーランス・個人事業主向けの源泉徴収計算機。報酬額から源泉徴収税額と手取りを自動計算。手取り希望額から必要な報酬額の逆算も可能。登録不要・完全無料・データはどこにも送信されません。">
+<link rel="canonical" href="https://taku0826.github.io/nadeshiko-tax/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ナデシコ源泉徴収計算機 — 報酬税額・手取りをすぐ計算">
+<meta property="og:description" content="報酬から源泉徴収税額を計算、手取り額の逆算も。フリーランス向け、登録不要・完全無料。">
+<meta property="og:url" content="https://taku0826.github.io/nadeshiko-tax/">
+<meta property="og:site_name" content="ナデシコ源泉徴収計算機">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ナデシコ源泉徴収計算機 — 報酬税額・手取りをすぐ計算">
+<meta name="twitter:description" content="報酬から源泉徴収税額を計算、手取り額の逆算も。フリーランス向け、登録不要・完全無料。">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "ナデシコ源泉徴収計算機",
+  "url": "https://taku0826.github.io/nadeshiko-tax/",
+  "description": "フリーランス・個人事業主向け源泉徴収計算機。登録不要・完全無料・データはどこにも送信されない完全ローカル動作。",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "ja",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
+}
+</script>
+<style>
+  :root {
+    --ai: #1B2A4A;
+    --ai-deep: #11203B;
+    --nadeshiko: #C2558E;
+    --nadeshiko-light: #F9EEF4;
+    --washi: #F7F8F6;
+    --kami: #FFFFFF;
+    --sumi: #23272E;
+    --usuzumi: #6B7280;
+    --keisen: #D7DCE3;
+    --ok: #2E7D32;
+    --ok-light: #E8F5E9;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic","Noto Sans JP","Meiryo",sans-serif;
+    background: var(--washi);
+    color: var(--sumi);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ヘッダー */
+  header.app {
+    background: var(--ai);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand h1 { font-size: 18px; font-weight: 700; letter-spacing: .08em; }
+  .brand span { font-size: 11px; opacity: .75; letter-spacing: .05em; }
+
+  /* メイン */
+  main {
+    max-width: 800px;
+    margin: 32px auto;
+    padding: 0 16px 48px;
+  }
+
+  /* カード */
+  .card {
+    background: var(--kami);
+    border: 1px solid var(--keisen);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ai);
+    letter-spacing: .15em;
+    border-left: 3px solid var(--nadeshiko);
+    padding-left: 8px;
+    margin-bottom: 20px;
+  }
+
+  /* モード切替 */
+  .mode-switch {
+    display: flex;
+    border: 1px solid var(--keisen);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .mode-switch button {
+    flex: 1;
+    padding: 12px 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: var(--washi);
+    color: var(--usuzumi);
+    transition: background .15s, color .15s;
+    line-height: 1.4;
+  }
+  .mode-switch button.active {
+    background: var(--nadeshiko);
+    color: #fff;
+  }
+  .mode-switch button:first-child { border-right: 1px solid var(--keisen); }
+  .mode-switch small { display: block; font-weight: 400; font-size: 11px; margin-top: 2px; }
+
+  /* 入力フィールド */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 11px; color: var(--usuzumi); margin-bottom: 4px; letter-spacing: .05em; }
+  .field input, .field select {
+    width: 100%;
+    font-family: inherit;
+    font-size: 16px;
+    border: 1px solid var(--keisen);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #FDFDFC;
+    color: var(--sumi);
+  }
+  .field input:focus, .field select:focus {
+    outline: 2px solid var(--ai);
+    outline-offset: 0;
+    border-color: var(--ai);
+  }
+  .hint { font-size: 11px; color: var(--usuzumi); margin-top: 4px; }
+
+  /* 結果 */
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  @media (max-width: 540px) { .result-grid { grid-template-columns: 1fr; } }
+
+  .result-item {
+    background: var(--washi);
+    border: 1px solid var(--keisen);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .result-item.full { grid-column: 1 / -1; }
+  .result-item.accent-pink {
+    background: var(--nadeshiko-light);
+    border-color: var(--nadeshiko);
+  }
+  .result-item.accent-green {
+    background: var(--ok-light);
+    border-color: #A5D6A7;
+  }
+  .result-item .lbl {
+    font-size: 11px;
+    color: var(--usuzumi);
+    letter-spacing: .04em;
+    margin-bottom: 4px;
+  }
+  .result-item .val {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+  .result-item.accent-pink .val { color: var(--nadeshiko); }
+  .result-item.accent-green .val { color: var(--ok); }
+  .result-item .sub {
+    font-size: 11px;
+    color: var(--usuzumi);
+    margin-top: 3px;
+  }
+
+  .copy-row {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-copy {
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid var(--nadeshiko);
+    border-radius: 6px;
+    padding: 8px 18px;
+    background: #fff;
+    color: var(--nadeshiko);
+    font-weight: 600;
+    transition: background .15s;
+  }
+  .btn-copy:hover { background: var(--nadeshiko-light); }
+  .btn-copy.copied { background: var(--nadeshiko); color: #fff; border-color: var(--nadeshiko); }
+
+  /* 解説 */
+  details.explain {
+    background: var(--kami);
+    border: 1px solid var(--keisen);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  details.explain summary {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ai);
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  details.explain summary::-webkit-details-marker { display: none; }
+  details.explain summary::before {
+    content: "\25B6";
+    font-size: 10px;
+    color: var(--nadeshiko);
+    transition: transform .15s;
+    flex-shrink: 0;
+  }
+  details[open].explain summary::before { transform: rotate(90deg); }
+  .explain-body { padding: 0 20px 20px; }
+  .explain-body p { font-size: 12px; color: var(--usuzumi); margin-top: 8px; }
+  .explain-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 12px;
+  }
+  .explain-body th, .explain-body td {
+    border: 1px solid var(--keisen);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .explain-body th { background: var(--washi); font-weight: 600; }
+
+  /* フッター */
+  footer.credit {
+    text-align: center;
+    font-size: 11px;
+    color: var(--usuzumi);
+    padding: 18px 0 30px;
+  }
+  footer.credit a { color: var(--ai); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div class="brand">
+    <h1>ナデシコ源泉徴収計算機</h1>
+    <span>フリーランス・個人事業主の報酬税額をすぐ計算</span>
+  </div>
+</header>
+
+<main>
+
+  <div class="card">
+    <div class="card-title">計算モード</div>
+
+    <div class="mode-switch" role="group" aria-label="計算モード">
+      <button id="modeForward" class="active" onclick="setMode('forward')">
+        報酬額から計算
+        <small>報酬 → 源泉徴収税額・手取り</small>
+      </button>
+      <button id="modeReverse" onclick="setMode('reverse')">
+        手取りから逆算
+        <small>希望手取り額 → 必要な報酬額</small>
+      </button>
+    </div>
+
+    <div class="field">
+      <label id="amountLabel" for="amount">報酬額(税抜)</label>
+      <input type="number" id="amount" min="0" step="1000" placeholder="500000" inputmode="numeric">
+      <p class="hint" id="amountHint">消費税抜きの報酬額を入力してください(源泉徴収は消費税抜きの金額が対象)。</p>
+    </div>
+
+    <p class="hint" style="margin-bottom:16px">対象:原稿料・デザイン料・翻訳料・講演料・士業報酬など、源泉徴収の対象となる報酬(税率10.21%、100万円超の部分は20.42%)。</p>
+
+    <div class="result-grid" id="resultGrid">
+      <div class="result-item full" id="resRewardBox">
+        <div class="lbl" id="resRewardLabel">報酬額(請求書に書く金額・税抜)</div>
+        <div class="val" id="resRewardVal">—</div>
+        <div class="sub" id="resRewardSub"></div>
+      </div>
+      <div class="result-item accent-pink">
+        <div class="lbl">源泉徴収税額(差し引かれる額)</div>
+        <div class="val" id="resWithholding">—</div>
+        <div class="sub" id="resWithholdingSub"></div>
+      </div>
+      <div class="result-item accent-green">
+        <div class="lbl">手取り額(振り込まれる額)</div>
+        <div class="val" id="resNet">—</div>
+        <div class="sub" id="resNetSub"></div>
+      </div>
+    </div>
+
+    <div class="copy-row">
+      <button class="btn-copy" id="btnCopy">計算結果をコピー</button>
+    </div>
+  </div>
+
+  <details class="explain">
+    <summary>源泉徴収の仕組みと計算式</summary>
+    <div class="explain-body">
+      <p>フリーランス・個人事業主が一定の業務に関する報酬を受け取るとき、支払う側(クライアント)が税金(所得税+復興特別所得税)を先に差し引いて国に納める制度が源泉徴収です。</p>
+      <table>
+        <thead>
+          <tr><th>報酬額(税抜)</th><th>計算式</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>100万円以下</td>
+            <td>報酬 × 10.21%</td>
+          </tr>
+          <tr>
+            <td>100万円超</td>
+            <td>102,100円 + (報酬 − 100万円) × 20.42%</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>税率には復興特別所得税(2.1%)が含まれています(2037年12月31日まで)。源泉徴収税額は1円未満切り捨てです。</p>
+      <p>この計算機は消費税抜きの報酬額を対象としています。クライアントに請求する際の消費税は、源泉徴収の計算には含めません。</p>
+      <p>※ 源泉徴収の対象となる報酬は所得税法で定められたものに限られます(原稿料・デザイン料・講演料・弁護士や税理士等の士業報酬など)。プログラミング作業の対価など、対象にならない業務もあります。また、司法書士報酬など一部は計算式が異なります。判断に迷う場合は税理士・税務署にご確認ください。</p>
+    </div>
+  </details>
+
+  <footer class="credit">
+    ナデシコ源泉徴収計算機 — ブラウザだけで動きます。入力内容はどこにも送信されません。<br>
+    姉妹ツール:
+    <a href="https://taku0826.github.io/asagao-receipt/">アサガオ領収書</a> /
+    <a href="https://taku0826.github.io/tsubaki-estimate/">ツバキ見積書</a> /
+    <a href="https://taku0826.github.io/sumire-invoice/">スミレ請求書</a>
+  </footer>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  var currentMode = "forward";
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById("modeForward").classList.toggle("active", mode === "forward");
+    document.getElementById("modeReverse").classList.toggle("active", mode === "reverse");
+    if (mode === "forward") {
+      document.getElementById("amountLabel").textContent = "報酬額(税抜)";
+      document.getElementById("amountHint").textContent = "消費税抜きの報酬額を入力してください(源泉徴収は消費税抜きの金額が対象)。";
+      document.getElementById("resRewardLabel").textContent = "報酬額(請求書に書く金額・税抜)";
+      document.getElementById("resRewardSub").textContent = "";
+    } else {
+      document.getElementById("amountLabel").textContent = "希望手取り額";
+      document.getElementById("amountHint").textContent = "実際に受け取りたい金額を入力してください。必要な報酬額を逆算します。";
+      document.getElementById("resRewardLabel").textContent = "必要な報酬額(請求書に書く金額・税抜)";
+    }
+    calc();
+  }
+  window.setMode = setMode;
+
+  function yen(n) {
+    return "\xA5" + Math.round(n).toLocaleString("ja-JP");
+  }
+
+  function calcWithholding(reward) {
+    if (reward <= 0) return 0;
+    return reward <= 1000000
+      ? Math.floor(reward * 0.1021)
+      : Math.floor(102100 + (reward - 1000000) * 0.2042);
+  }
+
+  /* 希望手取り額を満たす最小の報酬額を二分探索で求める */
+  function reverseCalc(net) {
+    if (net <= 0) return 0;
+    var lo = net, hi = Math.ceil(net * 1.3);
+    while (lo < hi) {
+      var mid = Math.floor((lo + hi) / 2);
+      if (mid - calcWithholding(mid) >= net) hi = mid;
+      else lo = mid + 1;
+    }
+    return lo;
+  }
+
+  function calc() {
+    var inputVal = Math.round(parseFloat(document.getElementById("amount").value) || 0);
+
+    if (inputVal <= 0) {
+      ["resRewardVal", "resWithholding", "resNet"].forEach(function(id) {
+        document.getElementById(id).textContent = "—";
+      });
+      ["resRewardSub", "resWithholdingSub", "resNetSub"].forEach(function(id) {
+        document.getElementById(id).textContent = "";
+      });
+      return;
+    }
+
+    var reward, withholding, net;
+    if (currentMode === "forward") {
+      reward = inputVal;
+      withholding = calcWithholding(reward);
+      net = reward - withholding;
+    } else {
+      net = inputVal;
+      reward = reverseCalc(net);
+      withholding = calcWithholding(reward);
+      net = reward - withholding;
+    }
+
+    document.getElementById("resRewardVal").textContent = yen(reward);
+    document.getElementById("resWithholding").textContent = yen(withholding);
+    document.getElementById("resNet").textContent = yen(net);
+
+    var pct = reward > 0 ? (withholding / reward * 100).toFixed(2) : "0";
+    var netPct = reward > 0 ? (net / reward * 100).toFixed(1) : "0";
+    document.getElementById("resWithholdingSub").textContent = "報酬の " + pct + "%";
+    document.getElementById("resNetSub").textContent = "手取り率 " + netPct + "%";
+    if (currentMode === "reverse") {
+      document.getElementById("resRewardSub").textContent = "この金額で請求書を作成してください";
+    }
+  }
+
+  document.getElementById("amount").addEventListener("input", calc);
+
+  document.getElementById("btnCopy").addEventListener("click", function() {
+    var inputVal = Math.round(parseFloat(document.getElementById("amount").value) || 0);
+    if (inputVal <= 0) return;
+
+    var reward = document.getElementById("resRewardVal").textContent;
+    var withholding = document.getElementById("resWithholding").textContent;
+    var net = document.getElementById("resNet").textContent;
+    var modeLabel = currentMode === "forward" ? "報酬額から計算" : "手取りから逆算";
+    var text = [
+      "【源泉徴収計算結果】",
+      "モード: " + modeLabel,
+      "報酬額(請求書記載額): " + reward,
+      "源泉徴収税額: " + withholding,
+      "手取り額: " + net,
+      "（ナデシコ源泉徴収計算機 https://taku0826.github.io/nadeshiko-tax/ ）"
+    ].join("\n");
+
+    var btn = document.getElementById("btnCopy");
+    function done() {
+      btn.textContent = "コピーしました！";
+      btn.classList.add("copied");
+      setTimeout(function() { btn.textContent = "計算結果をコピー"; btn.classList.remove("copied"); }, 2000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function() {
+        fallbackCopy(text); done();
+      });
+    } else {
+      fallbackCopy(text); done();
+    }
+  });
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand("copy"); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
+  calc();
+})();
+</script>
+</body>
+</html>
