@@ -32,6 +32,7 @@
 
 - 🌼 [アサガオ領収書](https://taku0826.github.io/asagao-receipt/) — 領収書ジェネレーター
 - 🌺 [ツバキ見積書](https://taku0826.github.io/tsubaki-estimate/) — 見積書・納品書ジェネレーター
+- 🌸 [キキョウ発注書](https://taku0826.github.io/kikyo-order/) — 外注・仕入れ用の発注書ジェネレーター
 - 🌸 [スミレ請求書](https://taku0826.github.io/sumire-invoice/) — インボイス対応の請求書ジェネレーター
 
 ## フィードバック
