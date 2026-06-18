@@ -34,6 +34,7 @@
 - 🌺 [ツバキ見積書](https://taku0826.github.io/tsubaki-estimate/) — 見積書・納品書ジェネレーター
 - 🌸 [キキョウ発注書](https://taku0826.github.io/kikyo-order/) — 外注・仕入れ用の発注書ジェネレーター
 - 🌸 [スミレ請求書](https://taku0826.github.io/sumire-invoice/) — インボイス対応の請求書ジェネレーター
+- 🌸 [コスモス経費メモ帳](https://taku0826.github.io/kosmos-keihi/) — 経費を記録・カテゴリ別集計、CSV書き出しも
 
 ## フィードバック
 
